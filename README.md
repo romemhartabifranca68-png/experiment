@@ -1,4 +1,4 @@
-# GrokCall — Live Video Call Website
+# experiment — Live Video Call Website
 
 Magandang, modern, at **pure client-side** video calling website.  
 Walang backend, walang account, walang server na kailangan mo mag-maintain.
@@ -82,4 +82,4 @@ Gusto ng mas mataas na video quality? Baguhin ang `MEDIA_CONSTRAINTS` sa `script
 
 ---
 
-Ginawa para sa'yo ni Grok · Libre at open
+Libre at open source
