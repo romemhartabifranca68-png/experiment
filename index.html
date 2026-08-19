@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>GrokCall — Live Video Call</title>
+  <meta name="description" content="Magandang live video call website. Libre, walang account, hostable sa GitHub Pages." />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+</head>
+<body>
+  <!-- Landing / Setup Screen -->
+  <div id="setup-screen" class="screen active">
+    <div class="bg-orbs">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+
+    <div class="setup-card glass">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <h1>GrokCall</h1>
+      </div>
+      <p class="tagline">Live video call · Walang account · Libre</p>
+
+      <div class="form-group">
+        <label for="display-name">Pangalan mo</label>
+        <input type="text" id="display-name" placeholder="Hal. Juan" maxlength="20" autocomplete="off" />
+      </div>
+
+      <div class="action-buttons">
+        <button id="btn-create" class="btn btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 4v16m8-8H4"/>
+          </svg>
+          Gumawa ng Call
+        </button>
+        <button id="btn-join" class="btn btn-secondary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l5-5-5-5M15 12H3"/>
+          </svg>
+          Sumali sa Call
+        </button>
+      </div>
+
+      <div id="join-panel" class="join-panel hidden">
+        <div class="form-group">
+          <label for="room-id">Room ID / Peer ID</label>
+          <input type="text" id="room-id" placeholder="I-paste ang ID dito" autocomplete="off" />
+        </div>
+        <button id="btn-join-confirm" class="btn btn-primary full">Sumali Ngayon</button>
+      </div>
+
+      <div id="create-panel" class="create-panel hidden">
+        <p class="share-label">Ibahagi ang ID na ito sa kaibigan mo:</p>
+        <div class="id-box">
+          <code id="my-peer-id">—</code>
+          <button id="btn-copy" class="btn-icon" title="Kopyahin">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2"/>
+              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+            </svg>
+          </button>
+        </div>
+        <p class="waiting">Naghihintay ng kaibigan…</p>
+      </div>
+
+      <p class="footer-note">Gumagamit ng WebRTC · PeerJS · Libre at open</p>
+    </div>
+  </div>
+
+  <!-- Call Screen -->
+  <div id="call-screen" class="screen">
+    <div class="videos-container">
+      <div class="video-wrapper remote">
+        <video id="remote-video" autoplay playsinline></video>
+        <div class="video-label" id="remote-label">Kaibigan</div>
+        <div class="no-video-placeholder" id="remote-placeholder">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/>
+          </svg>
+          <span>Naghihintay ng video…</span>
+        </div>
+      </div>
+
+      <div class="video-wrapper local">
+        <video id="local-video" autoplay playsinline muted></video>
+        <div class="video-label" id="local-label">Ikaw</div>
+      </div>
+    </div>
+
+    <div class="controls glass">
+      <button id="btn-toggle-mic" class="control-btn" title="Mute / Unmute">
+        <svg class="icon-mic-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
+          <path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/>
+        </svg>
+        <svg class="icon-mic-off hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M1 1l22 22M9 9v3a3 3 0 005.12 2.12M15 9.34V4a3 3 0 00-5.94-.6"/>
+          <path d="M17 16.95A7 7 0 015 12v-2m14 0v2a7 7 0 01-.11 1.23M12 19v4M8 23h8"/>
+        </svg>
+      </button>
+
+      <button id="btn-toggle-cam" class="control-btn" title="Camera On / Off">
+        <svg class="icon-cam-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+        </svg>
+        <svg class="icon-cam-off hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M1 1l22 22M15 10l4.553-2.276A1 1 0 0121 8.618v.5M15 14v2a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h.5"/>
+        </svg>
+      </button>
+
+      <button id="btn-hangup" class="control-btn hangup" title="Tapusin ang Call">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10.68 13.31a16 16 0 006.33 6.33l2.2-2.2a1 1 0 011.02-.24 11.36 11.36 0 003.55.57 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1 11.36 11.36 0 00.57 3.55 1 1 0 01-.24 1.02l-2.2 2.2z"/>
+          <path d="M23 1L1 23"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="status-bar">
+      <span id="connection-status">Kumokonekta…</span>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
