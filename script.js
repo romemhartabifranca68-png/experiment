@@ -85,7 +85,6 @@ function setStatus(text, connected = false) {
 }
 
 function showToast(msg) {
-  // Simple feedback
   const old = document.querySelector('.toast');
   if (old) old.remove();
   const t = document.createElement('div');
@@ -118,7 +117,7 @@ async function getLocalStream() {
       localVideo.srcObject = localStream;
       return true;
     } catch (e2) {
-      alert('Hindi ma-access ang camera/mic. Payagan ang permission sa browser.');
+      alert('Cannot access camera/microphone. Please allow permission in your browser.');
       return false;
     }
   }
@@ -145,9 +144,9 @@ function createPeer(id = null) {
     p.on('error', (err) => {
       console.error('Peer error:', err);
       if (err.type === 'peer-unavailable') {
-        showToast('Hindi mahanap ang Peer ID');
+        showToast('Peer ID not found');
       } else if (err.type === 'unavailable-id') {
-        showToast('ID na ginagamit na. Subukan ulit.');
+        showToast('ID already in use. Try again.');
       } else {
         showToast('Error: ' + err.type);
       }
@@ -168,8 +167,8 @@ function createPeer(id = null) {
       call.on('stream', (remoteStream) => {
         remoteVideo.srcObject = remoteStream;
         remotePlaceholder.classList.add('hidden');
-        setStatus('Kumonekta na!', true);
-        remoteLabel.textContent = 'Kaibigan';
+        setStatus('Connected!', true);
+        remoteLabel.textContent = 'Friend';
       });
 
       call.on('close', () => {
@@ -192,7 +191,7 @@ async function startCall(remotePeerId) {
     if (!ok) return;
   }
 
-  setStatus('Tinatawag…');
+  setStatus('Calling…');
   showScreen(callScreen);
 
   const call = peer.call(remotePeerId, localStream);
@@ -201,7 +200,7 @@ async function startCall(remotePeerId) {
   call.on('stream', (remoteStream) => {
     remoteVideo.srcObject = remoteStream;
     remotePlaceholder.classList.add('hidden');
-    setStatus('Kumonekta na!', true);
+    setStatus('Connected!', true);
   });
 
   call.on('close', () => {
@@ -210,7 +209,7 @@ async function startCall(remotePeerId) {
 
   call.on('error', (err) => {
     console.error('Call error:', err);
-    showToast('Hindi makatawag. Check ang ID.');
+    showToast('Could not call. Check the ID.');
     endCallCleanup();
   });
 }
@@ -222,7 +221,7 @@ function endCallCleanup() {
   }
   remoteVideo.srcObject = null;
   remotePlaceholder.classList.remove('hidden');
-  setStatus('Tapos na ang call');
+  setStatus('Call ended');
   // Go back after short delay
   setTimeout(() => {
     stopLocalStream();
@@ -240,11 +239,11 @@ function endCallCleanup() {
 
 // ====================== UI Events ======================
 btnCreate.addEventListener('click', async () => {
-  myName = displayNameInput.value.trim() || 'Ikaw';
+  myName = displayNameInput.value.trim() || 'You';
   localLabel.textContent = myName;
 
   btnCreate.disabled = true;
-  btnCreate.textContent = 'Gumagawa…';
+  btnCreate.textContent = 'Creating…';
 
   try {
     peer = await createPeer();
@@ -256,14 +255,14 @@ btnCreate.addEventListener('click', async () => {
     await getLocalStream();
   } catch (e) {
     console.error(e);
-    showToast('Hindi makagawa ng peer. Subukan ulit.');
+    showToast('Could not create peer. Try again.');
   } finally {
     btnCreate.disabled = false;
     btnCreate.innerHTML = `
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M12 4v16m8-8H4"/>
       </svg>
-      Gumawa ng Call
+      Create Call
     `;
   }
 });
@@ -276,15 +275,15 @@ btnJoin.addEventListener('click', () => {
 btnJoinConfirm.addEventListener('click', async () => {
   const remoteId = roomIdInput.value.trim();
   if (!remoteId) {
-    showToast('Ilagay ang Room / Peer ID');
+    showToast('Please enter the Room / Peer ID');
     return;
   }
 
-  myName = displayNameInput.value.trim() || 'Ikaw';
+  myName = displayNameInput.value.trim() || 'You';
   localLabel.textContent = myName;
 
   btnJoinConfirm.disabled = true;
-  btnJoinConfirm.textContent = 'Kumokonekta…';
+  btnJoinConfirm.textContent = 'Connecting…';
 
   try {
     peer = await createPeer();
@@ -293,7 +292,7 @@ btnJoinConfirm.addEventListener('click', async () => {
     console.error(e);
   } finally {
     btnJoinConfirm.disabled = false;
-    btnJoinConfirm.textContent = 'Sumali Ngayon';
+    btnJoinConfirm.textContent = 'Join Now';
   }
 });
 
@@ -301,7 +300,7 @@ btnCopy.addEventListener('click', () => {
   const id = myPeerIdEl.textContent;
   if (id && id !== '—') {
     navigator.clipboard.writeText(id).then(() => {
-      showToast('Nakopya na ang ID!');
+      showToast('ID copied!');
     }).catch(() => {
       // Fallback
       const ta = document.createElement('textarea');
@@ -310,7 +309,7 @@ btnCopy.addEventListener('click', () => {
       ta.select();
       document.execCommand('copy');
       document.body.removeChild(ta);
-      showToast('Nakopya na ang ID!');
+      showToast('ID copied!');
     });
   }
 });
