@@ -1,4 +1,4 @@
-// ====================== GrokCall - WebRTC Video Call ======================
+// ====================== experiment - WebRTC Video Call ======================
 // Optimized for quality + GitHub Pages (static hosting)
 
 const PEER_CONFIG = {
